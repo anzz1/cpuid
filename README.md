@@ -2,10 +2,8 @@
 
 cross-platform cross-compiler single-header C/C++ cpuid intrinsic.  
 
-This should alleviate the clusterfuck of __cpuid intrinsics as it seems that every compiler decided   
-that they had to have their own instead of using a common standard.
-
-Being simply pure machine code, this should work with every compiler on planet Earth.
+v2 branch uses the cpuid compiler instrinsics for GCC/Clang/MSVC support and works on Linux/BSD/Windows/macOS, and is compatible with modern compilers.
+For older or obscure compilers that allow machine code inlining and doesn't have the cpuid intrinsics, refer to the v1 branch.
 
 **cpuid.h**  
 can be included to your application or just copypasta the functions you need  

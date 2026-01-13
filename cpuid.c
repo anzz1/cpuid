@@ -1,7 +1,7 @@
 // cpuid.c
 
 /*
- * cpuid v1.00
+ * cpuid v2.00
  * https://github.com/anzz1/cpuid
  */
 
@@ -119,22 +119,28 @@ int main(void)
   printf("LA57=%d\n", CPUID_LA57());
   printf("RDPID=%d\n", CPUID_RDPID());
   printf("KL=%d\n", CPUID_KL());
+  printf("BUS_LOCK_DETECT=%d\n", CPUID_BUS_LOCK_DETECT());
   printf("CLDEMOTE=%d\n", CPUID_CLDEMOTE());
   printf("MOVDIRI=%d\n", CPUID_MOVDIRI());
   printf("MOVDIR64B=%d\n", CPUID_MOVDIR64B());
   printf("ENQCMD=%d\n", CPUID_ENQCMD());
   printf("SGX_LC=%d\n", CPUID_SGX_LC());
   printf("PKS=%d\n", CPUID_PKS());
+  printf("SGX_KEYS=%d\n", CPUID_SGX_KEYS());
   printf("AVX512_4VNNIW=%d\n", CPUID_AVX512_4VNNIW());
   printf("AVX512_4FMAPS=%d\n", CPUID_AVX512_4FMAPS());
   printf("FSREPMOV=%d\n", CPUID_FSREPMOV());
   printf("UINTR=%d\n", CPUID_UINTR());
   printf("AVX512_VP2INTERSECT=%d\n", CPUID_AVX512_VP2INTERSECT());
+  printf("SRBDS_CTRL=%d\n", CPUID_SRBDS_CTRL());
   printf("MDCLEAR=%d\n", CPUID_MDCLEAR());
+  printf("RTM_ALWAYS_ABORT=%d\n", CPUID_RTM_ALWAYS_ABORT());
+  printf("RTM_FORCE_ABORT=%d\n", CPUID_RTM_FORCE_ABORT());
   printf("SERIALIZE=%d\n", CPUID_SERIALIZE());
   printf("HYBRID=%d\n", CPUID_HYBRID());
   printf("TSXLDTRK=%d\n", CPUID_TSXLDTRK());
   printf("PCONFIG=%d\n", CPUID_PCONFIG());
+  printf("ALRBS=%d\n", CPUID_ALRBS());
   printf("CET_IBT=%d\n", CPUID_CET_IBT());
   printf("AMX_BF16=%d\n", CPUID_AMX_BF16());
   printf("AVX512_FP16=%d\n", CPUID_AVX512_FP16());
@@ -146,6 +152,32 @@ int main(void)
   printf("ACAPMSR=%d\n", CPUID_ACAPMSR());
   printf("CCAPMSR=%d\n", CPUID_CCAPMSR());
   printf("SSBD=%d\n", CPUID_SSBD());
+  printf("CPUID_SHA512=%d\n", CPUID_SHA512());
+  printf("CPUID_SM3=%d\n", CPUID_SM3());
+  printf("CPUID_SM4=%d\n", CPUID_SM4());
+  printf("CPUID_RAO_INT=%d\n", CPUID_RAO_INT());
+  printf("CPUID_AVX_VNNI=%d\n", CPUID_AVX_VNNI());
+  printf("CPUID_AVX512_BF16=%d\n", CPUID_AVX512_BF16());
+  printf("CPUID_LASS=%d\n", CPUID_LASS());
+  printf("CPUID_CMPCCXADD=%d\n", CPUID_CMPCCXADD());
+  printf("CPUID_APMEXT=%d\n", CPUID_APMEXT());
+  printf("CPUID_FZLMSB=%d\n", CPUID_FZLMSB());
+  printf("CPUID_FSSB=%d\n", CPUID_FSSB());
+  printf("CPUID_FSCSB=%d\n", CPUID_FSCSB());
+  printf("CPUID_WRMSRNS=%d\n", CPUID_WRMSRNS());
+  printf("CPUID_AMX_FP16=%d\n", CPUID_AMX_FP16());
+  printf("CPUID_HRESET=%d\n", CPUID_HRESET());
+  printf("CPUID_AVX_IFMA=%d\n", CPUID_AVX_IFMA());
+  printf("CPUID_LAM=%d\n", CPUID_LAM());
+  printf("CPUID_MSRLIST=%d\n", CPUID_MSRLIST());
+  printf("CPUID_IA32_PPIN=%d\n", CPUID_IA32_PPIN());
+  printf("CPUID_IA32_TSE=%d\n", CPUID_IA32_TSE());
+  printf("CPUID_AVX_VNNI_INT8=%d\n", CPUID_AVX_VNNI_INT8());
+  printf("CPUID_AVX_NECONV=%d\n", CPUID_AVX_NECONV());
+  printf("CPUID_AMX_COMPLEX=%d\n", CPUID_AMX_COMPLEX());
+  printf("CPUID_AVX_VNNI_INT16=%d\n", CPUID_AVX_VNNI_INT16());
+  printf("CPUID_PREFETCHI=%d\n", CPUID_PREFETCHI());
+  printf("CPUID_CET_SSS=%d\n", CPUID_CET_SS());
   return 0;
 }
 

@@ -1,577 +1,235 @@
 // cpuid.h
 
 /*
- * cpuid v1.00
+ * cpuid v2.00
  * https://github.com/anzz1/cpuid
  */
 
 #ifndef __CPUID_H
 #define __CPUID_H
 
-#if ( defined(__GNUC__) || defined(__MINGW__) || defined (__clang__) )
+#if defined(_WIN64) || defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
+#undef __X86__
+#ifndef __X64__
+#define __X64__
+#endif
+#elif defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86)
+#undef __X64__
+#ifndef __X86__
+#define __X86__
+#endif
+#endif
+
+#if defined(__GNUC__) || defined (__clang__)
 #ifndef __forceinline
 #define __forceinline __attribute__((always_inline)) inline
 #endif
-#ifndef __cdecl
-#define __cdecl __attribute__((__cdecl__))
-#endif
 #endif
 
-#if defined(_WIN64) || defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
-#undef IS_X86
-#ifndef IS_X64
-#define IS_X64
-#endif
-#elif defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86)
-#undef IS_X64
-#ifndef IS_X86
-#define IS_X86
-#endif
+#if defined(__X86__) || defined(__X64__)
+
+#ifdef _MSC_VER
+#include <intrin.h>
+#else
+#include <cpuid.h>
 #endif
 
-#if defined(IS_X86) || defined(IS_X64)
+// Standard CPUID helper
+__forceinline static void cpuidex(unsigned int leaf, unsigned int subleaf,
+                           unsigned int *eax, unsigned int *ebx,
+                           unsigned int *ecx, unsigned int *edx) {
+#ifdef _MSC_VER
+  int regs[4];
+  __cpuidex(regs, leaf, subleaf);
+  *eax = regs[0]; *ebx = regs[1]; *ecx = regs[2]; *edx = regs[3];
+#else
+  __get_cpuid_count(leaf, subleaf, eax, ebx, ecx, edx);
+#endif
+}
 
-__forceinline unsigned int CPUID_SSE3(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PCLMULQDQ(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xD1,0xE9,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_DTES64(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x02,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_MONITOR(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x03,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_DS_CPL(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x04,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_VMX(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x05,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SMX(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x06,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_EIST(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x07,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_TM2(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x08,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SSSE3(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x09,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_CNXT_ID(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x0A,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SDBG(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x0B,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_FMA(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x0C,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_CMPXCHG16B(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x0D,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_XTPR(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x0E,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PDCM(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x0F,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PCID(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x11,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_DCA(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x12,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SSE4_1(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x13,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SSE4_2(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x14,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_X2APIC(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x15,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_MOVBE(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x16,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_POPCNT(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x17,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_TSC_DEADLINE(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x18,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AESNI(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x19,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_XSAVE(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x1A,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_OSXSAVE(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x1B,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x1C,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_F16C(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x1D,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_RDRAND(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x1E,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_FPU(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_VME(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xD1,0xEA,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_DE(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x02,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PSE(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x03,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_TSC(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x04,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_MSR(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x05,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PAE(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x06,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_MCE(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x07,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_CX8(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x08,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_APIC(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x09,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SEP(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x0B,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_MTRR(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x0C,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PGE(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x0D,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_MCA(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x0E,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_CMOV(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x0F,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PAT(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x10,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PSE_36(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x11,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PSN(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x12,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_CLFSH(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x13,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_DS(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x15,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_ACPI(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x16,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_MMX(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x17,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_FXSR(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x18,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SSE(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x19,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SSE2(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x1A,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SS(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x1B,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_HTT(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x1C,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_TM(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x1D,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PBE(void) {
-  static unsigned const char a[] = {0x53,0xB8,0x01,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x1F,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_FSGSBASE(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_IA32_TSC_ADJUST(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xD1,0xEB,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SGX(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x02,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_BMI1(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x03,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_HLE(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x04,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX2(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x05,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_FDP_EXCPTN_ONLY(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x06,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SMEP(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x07,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_BMI2(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x08,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_ERMSB(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x09,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_INVPCID(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x0A,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_RTM(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x0B,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_RDTM(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x0C,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_DFPUCDS(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x0D,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_MPX(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x0E,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_RDTA(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x0F,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512F(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x10,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512DQ(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x11,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_RDSEED(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x12,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_ADX(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x13,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SMAP(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x14,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512_IFMA(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x15,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_CLFLUSHOPT(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x17,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_CLWB(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x18,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PT(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x19,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512PF(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x1A,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512ER(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x1B,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512CD(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x1C,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SHA(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x1D,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512BW(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x1E,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512VL(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEB,0x1F,0x83,0xE3,0x01,0x89,0xD8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PREFETCHWT1(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512_VBMI(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xD1,0xE9,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_UMIP(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x02,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PKU(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x03,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_OSPKE(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x04,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_WAITPKG(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x05,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512_VBMI2(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x06,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_CET_SS(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x07,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_GFNI(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x08,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_VAES(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x09,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_VPCLMULQDQ(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x0A,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512_VNNI(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x0B,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512_BITALG(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x0C,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_TME_EN(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x0D,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512_VPOPCNTDQ(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x0E,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_LA57(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x10,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_RDPID(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x16,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_KL(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x17,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_CLDEMOTE(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x19,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_MOVDIRI(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x1B,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_MOVDIR64B(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x1C,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_ENQCMD(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x1D,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SGX_LC(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x1E,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PKS(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xE9,0x1F,0x83,0xE1,0x01,0x89,0xC8,0x5B,0xC3};
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512_4VNNIW(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x02,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512_4FMAPS(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x03,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_FSREPMOV(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x04,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_UINTR(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x05,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512_VP2INTERSECT(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x08,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_MDCLEAR(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x0A,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SERIALIZE(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x0E,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_HYBRID(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x0F,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_TSXLDTRK(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x10,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_PCONFIG(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x12,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_CET_IBT(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x14,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AMX_BF16(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x16,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AVX512_FP16(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x17,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AMX_TILE(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x18,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_AMX_INT8(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x19,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_IBRS(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x1A,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_STIBP(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x1B,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_L1DF(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x1C,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_ACAPMSR(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x1D,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_CCAPMSR(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x1E,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-__forceinline unsigned int CPUID_SSBD(void) {
-  static unsigned const char a[] = {0x53,0x31,0xC9,0xB8,0x07,0x00,0x00,0x00,0x0F,0xA2,0xC1,0xEA,0x1F,0x83,0xE2,0x01,0x89,0xD0,0x5B,0xC3}; 
-  return ((unsigned int (__cdecl *)(void)) (void*)((void*)a))();
-}
-#endif // defined(IS_X86) || defined(IS_X64)
+// Leaf 1, ECX
+__forceinline static unsigned int CPUID_SSE3(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<0))!=0; }
+__forceinline static unsigned int CPUID_PCLMULQDQ(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<1))!=0; }
+__forceinline static unsigned int CPUID_DTES64(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<2))!=0; }
+__forceinline static unsigned int CPUID_MONITOR(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<3))!=0; }
+__forceinline static unsigned int CPUID_DS_CPL(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<4))!=0; }
+__forceinline static unsigned int CPUID_VMX(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<5))!=0; }
+__forceinline static unsigned int CPUID_SMX(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<6))!=0; }
+__forceinline static unsigned int CPUID_EIST(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<7))!=0; }
+__forceinline static unsigned int CPUID_TM2(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<8))!=0; }
+__forceinline static unsigned int CPUID_SSSE3(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<9))!=0; }
+__forceinline static unsigned int CPUID_CNXT_ID(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<10))!=0; }
+__forceinline static unsigned int CPUID_SDBG(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<11))!=0; }
+__forceinline static unsigned int CPUID_FMA(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<12))!=0; }
+__forceinline static unsigned int CPUID_CMPXCHG16B(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<13))!=0; }
+__forceinline static unsigned int CPUID_XTPR(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<14))!=0; }
+__forceinline static unsigned int CPUID_PDCM(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<15))!=0; }
+__forceinline static unsigned int CPUID_PCID(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<17))!=0; }
+__forceinline static unsigned int CPUID_DCA(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<18))!=0; }
+__forceinline static unsigned int CPUID_SSE4_1(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<19))!=0; }
+__forceinline static unsigned int CPUID_SSE4_2(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<20))!=0; }
+__forceinline static unsigned int CPUID_X2APIC(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<21))!=0; }
+__forceinline static unsigned int CPUID_MOVBE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<22))!=0; }
+__forceinline static unsigned int CPUID_POPCNT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<23))!=0; }
+__forceinline static unsigned int CPUID_TSC_DEADLINE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<24))!=0; }
+__forceinline static unsigned int CPUID_AESNI(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<25))!=0; }
+__forceinline static unsigned int CPUID_XSAVE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<26))!=0; }
+__forceinline static unsigned int CPUID_OSXSAVE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<27))!=0; }
+__forceinline static unsigned int CPUID_AVX(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<28))!=0; }
+__forceinline static unsigned int CPUID_F16C(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<29))!=0; }
+__forceinline static unsigned int CPUID_RDRAND(void)  { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<30))!=0; }
+
+// Leaf 1, EDX
+__forceinline static unsigned int CPUID_FPU(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<0))!=0; }
+__forceinline static unsigned int CPUID_VME(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<1))!=0; }
+__forceinline static unsigned int CPUID_DE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<2))!=0; }
+__forceinline static unsigned int CPUID_PSE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<3))!=0; }
+__forceinline static unsigned int CPUID_TSC(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<4))!=0; }
+__forceinline static unsigned int CPUID_MSR(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<5))!=0; }
+__forceinline static unsigned int CPUID_PAE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<6))!=0; }
+__forceinline static unsigned int CPUID_MCE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<7))!=0; }
+__forceinline static unsigned int CPUID_CX8(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<8))!=0; }
+__forceinline static unsigned int CPUID_APIC(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<9))!=0; }
+__forceinline static unsigned int CPUID_SEP(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<11))!=0; }
+__forceinline static unsigned int CPUID_MTRR(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<12))!=0; }
+__forceinline static unsigned int CPUID_PGE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<13))!=0; }
+__forceinline static unsigned int CPUID_MCA(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<14))!=0; }
+__forceinline static unsigned int CPUID_CMOV(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<15))!=0; }
+__forceinline static unsigned int CPUID_PAT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<16))!=0; }
+__forceinline static unsigned int CPUID_PSE_36(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<17))!=0; }
+__forceinline static unsigned int CPUID_PSN(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<18))!=0; }
+__forceinline static unsigned int CPUID_CLFSH(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<19))!=0; }
+__forceinline static unsigned int CPUID_DS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<21))!=0; }
+__forceinline static unsigned int CPUID_ACPI(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<22))!=0; }
+__forceinline static unsigned int CPUID_MMX(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<23))!=0; }
+__forceinline static unsigned int CPUID_FXSR(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<24))!=0; }
+__forceinline static unsigned int CPUID_SSE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<25))!=0; }
+__forceinline static unsigned int CPUID_SSE2(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<26))!=0; }
+__forceinline static unsigned int CPUID_SS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<27))!=0; }
+__forceinline static unsigned int CPUID_HTT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<28))!=0; }
+__forceinline static unsigned int CPUID_TM(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<29))!=0; }
+__forceinline static unsigned int CPUID_PBE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(1,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<31))!=0; }
+
+// Leaf 7, subleaf 0, EBX
+__forceinline static unsigned int CPUID_FSGSBASE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<0))!=0; }
+__forceinline static unsigned int CPUID_IA32_TSC_ADJUST(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<1))!=0; }
+__forceinline static unsigned int CPUID_SGX(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<2))!=0; }
+__forceinline static unsigned int CPUID_BMI1(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<3))!=0; }
+__forceinline static unsigned int CPUID_HLE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<4))!=0; }
+__forceinline static unsigned int CPUID_AVX2(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<5))!=0; }
+__forceinline static unsigned int CPUID_FDP_EXCPTN_ONLY(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<6))!=0; }
+__forceinline static unsigned int CPUID_SMEP(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<7))!=0; }
+__forceinline static unsigned int CPUID_BMI2(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<8))!=0; }
+__forceinline static unsigned int CPUID_ERMSB(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<9))!=0; }
+__forceinline static unsigned int CPUID_INVPCID(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<10))!=0; }
+__forceinline static unsigned int CPUID_RTM(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<11))!=0; }
+__forceinline static unsigned int CPUID_RDTM(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<12))!=0; }
+__forceinline static unsigned int CPUID_DFPUCDS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<13))!=0; }
+__forceinline static unsigned int CPUID_MPX(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<14))!=0; }
+__forceinline static unsigned int CPUID_RDTA(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<15))!=0; }
+__forceinline static unsigned int CPUID_AVX512F(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<16))!=0; }
+__forceinline static unsigned int CPUID_AVX512DQ(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<17))!=0; }
+__forceinline static unsigned int CPUID_RDSEED(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<18))!=0; }
+__forceinline static unsigned int CPUID_ADX(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<19))!=0; }
+__forceinline static unsigned int CPUID_SMAP(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<20))!=0; }
+__forceinline static unsigned int CPUID_AVX512_IFMA(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<21))!=0; }
+__forceinline static unsigned int CPUID_CLFLUSHOPT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<23))!=0; }
+__forceinline static unsigned int CPUID_CLWB(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<24))!=0; }
+__forceinline static unsigned int CPUID_PT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<25))!=0; }
+__forceinline static unsigned int CPUID_AVX512PF(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<26))!=0; }
+__forceinline static unsigned int CPUID_AVX512ER(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<27))!=0; }
+__forceinline static unsigned int CPUID_AVX512CD(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<28))!=0; }
+__forceinline static unsigned int CPUID_SHA(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<29))!=0; }
+__forceinline static unsigned int CPUID_AVX512BW(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<30))!=0; }
+__forceinline static unsigned int CPUID_AVX512VL(void)  { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ebx & (1<<31))!=0; }
+
+// Leaf 7, subleaf 0, ECX
+__forceinline static unsigned int CPUID_PREFETCHWT1(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<0))!=0; }
+__forceinline static unsigned int CPUID_AVX512_VBMI(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<1))!=0; }
+__forceinline static unsigned int CPUID_UMIP(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<2))!=0; }
+__forceinline static unsigned int CPUID_PKU(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<3))!=0; }
+__forceinline static unsigned int CPUID_OSPKE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<4))!=0; }
+__forceinline static unsigned int CPUID_WAITPKG(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<5))!=0; }
+__forceinline static unsigned int CPUID_AVX512_VBMI2(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<6))!=0; }
+__forceinline static unsigned int CPUID_CET_SS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<7))!=0; }
+__forceinline static unsigned int CPUID_GFNI(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<8))!=0; }
+__forceinline static unsigned int CPUID_VAES(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<9))!=0; }
+__forceinline static unsigned int CPUID_VPCLMULQDQ(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<10))!=0; }
+__forceinline static unsigned int CPUID_AVX512_VNNI(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<11))!=0; }
+__forceinline static unsigned int CPUID_AVX512_BITALG(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<12))!=0; }
+__forceinline static unsigned int CPUID_TME_EN(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<13))!=0; }
+__forceinline static unsigned int CPUID_AVX512_VPOPCNTDQ(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<14))!=0; }
+__forceinline static unsigned int CPUID_LA57(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<16))!=0; }
+__forceinline static unsigned int CPUID_RDPID(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<22))!=0; }
+__forceinline static unsigned int CPUID_KL(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<23))!=0; }
+__forceinline static unsigned int CPUID_BUS_LOCK_DETECT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<24))!=0; }
+__forceinline static unsigned int CPUID_CLDEMOTE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<25))!=0; }
+__forceinline static unsigned int CPUID_MOVDIRI(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<27))!=0; }
+__forceinline static unsigned int CPUID_MOVDIR64B(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<28))!=0; }
+__forceinline static unsigned int CPUID_ENQCMD(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<29))!=0; }
+__forceinline static unsigned int CPUID_SGX_LC(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<30))!=0; }
+__forceinline static unsigned int CPUID_PKS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (ecx & (1<<31))!=0; }
+
+// Leaf 7, subleaf 0, EDX
+__forceinline static unsigned int CPUID_SGX_KEYS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<1))!=0; }
+__forceinline static unsigned int CPUID_AVX512_4VNNIW(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<2))!=0; }
+__forceinline static unsigned int CPUID_AVX512_4FMAPS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<3))!=0; }
+__forceinline static unsigned int CPUID_FSREPMOV(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<4))!=0; }
+__forceinline static unsigned int CPUID_UINTR(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<5))!=0; }
+__forceinline static unsigned int CPUID_AVX512_VP2INTERSECT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<8))!=0; }
+__forceinline static unsigned int CPUID_SRBDS_CTRL(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<9))!=0; }
+__forceinline static unsigned int CPUID_MDCLEAR(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<10))!=0; }
+__forceinline static unsigned int CPUID_RTM_ALWAYS_ABORT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<11))!=0; }
+__forceinline static unsigned int CPUID_RTM_FORCE_ABORT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<13))!=0; }
+__forceinline static unsigned int CPUID_SERIALIZE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<14))!=0; }
+__forceinline static unsigned int CPUID_HYBRID(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<15))!=0; }
+__forceinline static unsigned int CPUID_TSXLDTRK(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<16))!=0; }
+__forceinline static unsigned int CPUID_PCONFIG(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<18))!=0; }
+__forceinline static unsigned int CPUID_ALRBS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<19))!=0; }
+__forceinline static unsigned int CPUID_CET_IBT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<20))!=0; }
+__forceinline static unsigned int CPUID_AMX_BF16(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (edx & (1<<22))!=0; }
+__forceinline static unsigned int CPUID_AVX512_FP16(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<23))!=0; }
+__forceinline static unsigned int CPUID_AMX_TILE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<24))!=0; }
+__forceinline static unsigned int CPUID_AMX_INT8(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<25))!=0; }
+__forceinline static unsigned int CPUID_IBRS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<26))!=0; }
+__forceinline static unsigned int CPUID_STIBP(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<27))!=0; }
+__forceinline static unsigned int CPUID_L1DF(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<28))!=0; }
+__forceinline static unsigned int CPUID_ACAPMSR(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<29))!=0; }
+__forceinline static unsigned int CPUID_CCAPMSR(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<30))!=0; }
+__forceinline static unsigned int CPUID_SSBD(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,0,&eax,&ebx,&ecx,&edx); return (edx & (1<<31))!=0; }
+
+// Leaf 7, subleaf 1, EAX
+__forceinline static unsigned int CPUID_SHA512(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<0))!=0; }
+__forceinline static unsigned int CPUID_SM3(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<1))!=0; }
+__forceinline static unsigned int CPUID_SM4(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<2))!=0; }
+__forceinline static unsigned int CPUID_RAO_INT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<3))!=0; }
+__forceinline static unsigned int CPUID_AVX_VNNI(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<4))!=0; }
+__forceinline static unsigned int CPUID_AVX512_BF16(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<5))!=0; }
+__forceinline static unsigned int CPUID_LASS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<6))!=0; }
+__forceinline static unsigned int CPUID_CMPCCXADD(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<7))!=0; }
+__forceinline static unsigned int CPUID_APMEXT(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<8))!=0; }
+__forceinline static unsigned int CPUID_FZLMSB(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<10))!=0; }
+__forceinline static unsigned int CPUID_FSSB(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<11))!=0; }
+__forceinline static unsigned int CPUID_FSCSB(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<12))!=0; }
+__forceinline static unsigned int CPUID_WRMSRNS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<19))!=0; }
+__forceinline static unsigned int CPUID_AMX_FP16(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<21))!=0; }
+__forceinline static unsigned int CPUID_HRESET(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<22))!=0; }
+__forceinline static unsigned int CPUID_AVX_IFMA(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<23))!=0; }
+__forceinline static unsigned int CPUID_LAM(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<26))!=0; }
+__forceinline static unsigned int CPUID_MSRLIST(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (eax & (1<<27))!=0; }
+
+// Leaf 7, subleaf 1, EBX
+__forceinline static unsigned int CPUID_IA32_PPIN(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (ebx & (1<<0))!=0; }
+__forceinline static unsigned int CPUID_IA32_TSE(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (ebx & (1<<1))!=0; }
+
+// Leaf 7, subleaf 1, EDX
+__forceinline static unsigned int CPUID_AVX_VNNI_INT8(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (edx & (1<<4))!=0; }
+__forceinline static unsigned int CPUID_AVX_NECONV(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (edx & (1<<5))!=0; }
+__forceinline static unsigned int CPUID_AMX_COMPLEX(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (edx & (1<<8))!=0; }
+__forceinline static unsigned int CPUID_AVX_VNNI_INT16(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (edx & (1<<10))!=0; }
+__forceinline static unsigned int CPUID_PREFETCHI(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (edx & (1<<14))!=0; }
+__forceinline static unsigned int CPUID_CET_SSS(void) { unsigned int eax,ebx,ecx,edx; cpuidex(7,1,&eax,&ebx,&ecx,&edx); return (edx & (1<<18))!=0; }
+
+#endif // defined(__X86__) || defined(__X64__)
 
 #endif // __CPUID_H
-
